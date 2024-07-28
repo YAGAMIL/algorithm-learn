@@ -167,11 +167,11 @@ enum class OrderType {
 
 fun order(root: TreeNode?, type: OrderType, result: MutableList<Int>) {
     root?.let {
-        if (type == OrderType.PRE) result.add(root.`val`)
+        if (type == OrderType.PRE) result += root.`val`
         order(root.left, type, result)
-        if (type == OrderType.IN) result.add(root.`val`)
+        if (type == OrderType.IN) result += root.`val`
         order(root.right, type, result)
-        if (type == OrderType.POST) result.add(root.`val`)
+        if (type == OrderType.POST) result += root.`val`
     }
 }
 
@@ -341,8 +341,8 @@ class Node(var value: Int) {
 
 fun reversal(head: Node?): Node? {
     head?.next?.let {
-        var pre: Node? = null
-        var curr: Node? = head
+        var pre:Node? = null
+        var curr = head
         while (curr != null) {
             val next = curr.next
             curr.next = pre
