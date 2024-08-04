@@ -22,6 +22,11 @@ class LinkedNode<E>(val `val`: E) {
  */
 fun main() {
     val list = buildLinkedList(intArrayOf(0, 1, 2, 3, 4))
+    val list1 = buildLinkedList1(intArrayOf(0, 1, 2, 3, 4))
+
+    println("buildList1: ${list?.toContentString()}")
+    println("buildList2: ${list1?.toContentString()}")
+
     val reversal = reversal(list)
     println("reversal: ${reversal?.toContentString()}")
 
@@ -107,20 +112,29 @@ fun main() {
 
 fun buildLinkedList(arr: IntArray): LinkedNode<Int>? {
     if (arr.isEmpty()) return null
-    var i = 1
+    val vNode = LinkedNode(-1)
+    var curr = vNode
+    arr.forEach {
+        val node = LinkedNode(it)
+        curr.next = node
+        curr = node
+    }
+    return vNode.next
+}
+
+fun buildLinkedList1(arr: IntArray): LinkedNode<Int>? {
+    if (arr.isEmpty()) return null
     val head = LinkedNode(arr.first())
     var curr = head
-    while (i < arr.size) {
-        val next = LinkedNode(arr[i])
-        curr.next = next
-        curr = next
-        i++
+    for (i in 1 until arr.size) {
+        val node = LinkedNode(arr[i])
+        curr.next = node
+        curr = node
     }
     return head
 }
-
 fun reversal(head: LinkedNode<Int>?): LinkedNode<Int>? {
-    head?.next?.let {
+    head?.next?.run {
         var pre: LinkedNode<Int>? = null
         var curr = head
         while (curr != null) {
@@ -136,7 +150,7 @@ fun reversal(head: LinkedNode<Int>?): LinkedNode<Int>? {
 
 fun reversal2(head: LinkedNode<Int>?): LinkedNode<Int>? {
     head?.next?.let {
-        val vNode = LinkedNode(1)
+        val vNode = LinkedNode(-1)
         vNode.next = head
         while (head.next != null) {
             val next = head.next
@@ -160,18 +174,18 @@ fun reversal3(head: LinkedNode<Int>?): LinkedNode<Int>? {
 }
 
 fun reversalRange(head: LinkedNode<Int>?, l: Int, r: Int): LinkedNode<Int>? {
-    if (l >= r) return head
+    if(l >= r) return head
     head?.next?.let {
         val vNode = LinkedNode(-1)
         var edge = vNode
-        vNode.next = head
+        edge.next = head
         for (i in 1 until l) {
             edge = edge.next!!
         }
-        val last = edge.next
+        val curr = edge.next!!
         for (i in l until r) {
-            val next = last!!.next
-            last.next = next!!.next
+            val next = curr.next
+            curr.next = next!!.next
             next.next = edge.next
             edge.next = next
         }
@@ -180,13 +194,14 @@ fun reversalRange(head: LinkedNode<Int>?, l: Int, r: Int): LinkedNode<Int>? {
     return head
 }
 
+
 fun midOrUp(head: LinkedNode<Int>?): LinkedNode<Int>? {
     head?.next?.next?.let {
         var slow = head.next
-        var fast: LinkedNode<Int>? = it
+        var fast = it
         while (fast?.next?.next != null) {
             slow = slow!!.next
-            fast = fast.next!!.next
+            fast = fast.next!!.next!!
         }
         return slow
     }
@@ -195,11 +210,11 @@ fun midOrUp(head: LinkedNode<Int>?): LinkedNode<Int>? {
 
 fun midOrDown(head: LinkedNode<Int>?): LinkedNode<Int>? {
     head?.next?.let {
-        var slow = head.next
-        var fast = head.next
-        while (fast?.next?.next != null) {
-            slow = slow!!.next
-            fast = fast.next!!.next
+        var slow = it
+        var fast = it
+        while (fast.next?.next != null) {
+            slow = slow.next!!
+            fast = fast.next!!.next!!
         }
         return slow
     }
@@ -209,10 +224,10 @@ fun midOrDown(head: LinkedNode<Int>?): LinkedNode<Int>? {
 fun midOrUpMidPre(head: LinkedNode<Int>?): LinkedNode<Int>? {
     head?.next?.next?.let {
         var slow = head
-        var fast: LinkedNode<Int>? = it
-        while (fast?.next?.next != null) {
+        var fast = it
+        while (fast.next?.next != null) {
             slow = slow!!.next
-            fast = fast.next!!.next
+            fast = fast.next!!.next!!
         }
         return slow
     }
@@ -234,50 +249,55 @@ fun midOrDownMidPre(head: LinkedNode<Int>?): LinkedNode<Int>? {
 
 
 fun palindrome(head: LinkedNode<Int>?): Boolean {
-    val midOrUpMidPre = midOrUpMidPre(head)
-    val half = midOrUpMidPre!!.next
-    val reversal = reversal(half)
-    var halfCurr = reversal
-    var leftCurr = head
-    var result = true
-    while (halfCurr != null && leftCurr != null) {
-        if (halfCurr.`val` != leftCurr.`val`) {
-            result = false
-            break
+    head?.next?.let {
+        val lastHead = midOrUpMidPre(head)
+        val reversal = reversal(lastHead!!.next)
+        var result = true
+        var curr = head
+        var lastCurr = reversal
+        while (curr != reversal && curr != null && lastCurr != null) {
+            if (curr.`val` != lastCurr.`val`) {
+                result = false
+                break
+            }
+            curr = curr.next
+            lastCurr = lastCurr.next
         }
-        halfCurr = halfCurr.next
-        leftCurr = leftCurr.next
+        val regression = reversal(reversal)
+        lastHead.next = regression
+        return result
     }
-    midOrUpMidPre.next = reversal2(reversal)
-    return result
+    return true
 }
 
 fun partition(head: LinkedNode<Int>?, num: Int): LinkedNode<Int>? {
     head?.let {
-        val arr = mutableListOf(it)
-        var curr = head
+        val list = mutableListOf(it)
+        var curr = head.next
         while (curr != null) {
-            arr += curr
+            list += curr
             curr = curr.next
         }
-        var less = -1
-        var more = arr.size
+
         var i = 0
+        var less = -1
+        var more = list.size
         while (i < more) {
-            if (arr[i].`val` < num) {
-                swap(arr, i++, ++less)
-            } else if (arr[i].`val` == num) {
+            if (list[i].`val` < num) {
+                swap(list, i++, ++less)
+            } else if (list[i].`val` == num) {
                 i++
             } else {
-                swap(arr, i, --more)
+                swap(list, i, --more)
             }
         }
         val vNode = LinkedNode(-1)
+        vNode.next = list.first()
         curr = vNode
-        arr.forEach { node ->
+        list.forEach {node ->
             node.next = null
             curr!!.next = node
-            curr = curr!!.next
+            curr = node
         }
         return vNode.next
     }
