@@ -39,10 +39,10 @@ fun lengthOfLongestSubString(s: String): Int {
     val map = hashMapOf<Char, Int>()
     var l = 0
     var result = 0
-    s.forEachIndexed { i, c ->
+    s.forEachIndexed { r, c ->
         l = maxOf(l, (map[c] ?: 0) + 1)
-        result = maxOf(result, i - l + 1)
-        map[c] = i
+        result = maxOf(result, r - l + 1)
+        map[c] = r
     }
     return result
 }
@@ -61,18 +61,20 @@ fun lengthOfLongestSubString1(s: String): Int {
 
 fun minWindows(s: String, target: String): String {
     if (s.length < target.length) return ""
-    var l = 0
-    var len = Int.MAX_VALUE
+    val dept = IntArray(257)
+    target.forEach { dept[it.code]-- }
+    var need = target.length
     var start = 0
-    var debt = target.length
-    val need = IntArray(256)
-    target.forEach { need[it.code]-- }
-    s.forEachIndexed { i, c ->
-        if (need[c.code]++ < 0) debt--
-        if (debt == 0) {
-            while (need[s[l].code] > 0) need[s[l++].code]--
-            start = maxOf(l, start)
-            len = minOf(len, i - l + 1)
+    var len = Int.MAX_VALUE
+    var l = 0
+    s.forEachIndexed { r, c ->
+        if (dept[c.code]++ < 0) need--
+        if (need == 0) {
+            while (dept[s[l].code] > 0) dept[s[l++].code]--
+            if (r - l + 1 < len) {
+                start = l
+                len = r - l + 1
+            }
         }
     }
     return if (len == Int.MAX_VALUE) "" else s.substring(start, start + len)
@@ -81,13 +83,13 @@ fun minWindows(s: String, target: String): String {
 fun canCompleteCircuit(gas: IntArray, cost: IntArray): Int {
     var sum = 0
     var r = 0
-    val size = gas.size
     var len = 0
+    val size = cost.size
     gas.forEachIndexed { l, v ->
         while (sum >= 0) {
             if (len == size) return l
-            sum += v - cost[r]
             r = (l + len++) % size
+            sum += gas[r] - cost[r]
         }
         sum -= v - cost[l]
         len--
@@ -113,31 +115,31 @@ fun canCompleteCircuit1(gas: IntArray, cost: IntArray): Int {
 }
 
 fun balanceString(string: String): Int {
-    var l = 0
     var r = 0
     val size = string.length
-    var len = size
-    val require = size / 4
     val arr = IntArray(size)
     val count = IntArray(4)
-    string.forEachIndexed { i, c ->
-        val v = if (c == 'Q') 0 else if (c == 'W') 1 else if (c == 'E') 2 else 3
-        arr[i] = v
-        count[v]++
+    val require = size / 4
+    var len = size
+    string.forEachIndexed { index, c ->
+        val i = if (c == 'Q') 0 else if (c == 'W') 1 else if (c == 'E') 2 else 3
+        arr[index] = i
+        count[i]++
     }
-    while (r < size) {
-        while (!ok(count, r - l, require) && r < size) count[arr[r++]]--
-        if (ok(count, r - l, require)) len = minOf(len, r - l)
-        count[arr[l++]]++
+    arr.forEachIndexed { l, v ->
+        while (!ok(r - l, count, require) && r < size) count[arr[r++]]--
+        if (ok(r - l, count, require)) len = minOf(r - l, len)
+        count[arr[l]]++
     }
     return len
 }
 
-fun ok(count: IntArray, len: Int, require: Int): Boolean {
-    var rLen = len
+fun ok(len: Int, count: IntArray, require: Int): Boolean {
+    var length = len
     for (i in 0 until 4) {
-        if (count[i] > require) return false
-        rLen -= require - count[i]
+        if (require < count[i]) return false
+        length -= require - count[i]
     }
-    return rLen == 0
+    return length == 0
 }
+
