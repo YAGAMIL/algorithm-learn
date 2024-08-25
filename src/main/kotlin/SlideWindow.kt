@@ -30,8 +30,8 @@ fun minSubArrayLen(arr: IntArray, target: Int): Int {
 
 fun lengthOfLongestSubString(s: String): Int {
     val map = hashMapOf<Char, Int>()
-    var l = 0
     var result = 0
+    var l = 0
     s.forEachIndexed { r, c ->
         l = maxOf(l, (map[c] ?: 0) + 1)
         result = maxOf(result, r - l + 1)
@@ -41,12 +41,12 @@ fun lengthOfLongestSubString(s: String): Int {
 }
 
 fun lengthOfLongestSubString1(s: String): Int {
-    val map = IntArray(256) {-1}
-    var result = 0
+    val map = IntArray(256) { -1 }
     var l = 0
+    var result = 0
     s.forEachIndexed { r, c ->
-        l= maxOf(l, map[c.code]+1)
-        result = maxOf(result, r - l + 1)
+        l = maxOf(l, map[c.code] + 1)
+        result = maxOf(r - l + 1, result)
         map[c.code] = r
     }
     return result
@@ -54,12 +54,12 @@ fun lengthOfLongestSubString1(s: String): Int {
 
 fun minWindows(s: String, target: String): String {
     if (s.length < target.length) return ""
-    var start = 0
     var len = Int.MAX_VALUE
+    var start = 0
     var l = 0
-    val debt = IntArray(256)
-    target.forEach { debt[it.code]-- }
+    val debt = IntArray(246)
     var need = target.length
+    target.forEach { debt[it.code]-- }
     s.forEachIndexed { r, c ->
         if (debt[c.code]++ < 0) need--
         if (need == 0) {
@@ -70,7 +70,7 @@ fun minWindows(s: String, target: String): String {
             }
         }
     }
-    return if (len == Int.MAX_VALUE)  "" else s.substring(start, start + len)
+    return if (len == Int.MAX_VALUE) "" else s.substring(start, start + len)
 }
 
 fun canCompleteCircuit(gas: IntArray, cost: IntArray): Int {
