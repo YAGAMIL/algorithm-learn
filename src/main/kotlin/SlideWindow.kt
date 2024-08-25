@@ -1,7 +1,7 @@
 fun main() {
     println(lengthOfLongestSubString("abcabcbb"))
     println(lengthOfLongestSubString1("abcabcbb"))
-    println(minWindows("ABCD", "AC"))
+    println(minWindows("ADOBECODEBANC", "ABC"))
     val first = System.currentTimeMillis()
     println(canCompleteCircuit(intArrayOf(1, 2, 3, 4, 5), intArrayOf(3, 4, 5, 2, 1)))
     val second = System.currentTimeMillis()
@@ -54,23 +54,23 @@ fun lengthOfLongestSubString1(s: String): Int {
 
 fun minWindows(s: String, target: String): String {
     if (s.length < target.length) return ""
-    val dept = IntArray(257)
-    target.forEach { dept[it.code]-- }
-    var need = target.length
     var start = 0
     var len = Int.MAX_VALUE
     var l = 0
+    val debt = IntArray(256)
+    target.forEach { debt[it.code]-- }
+    var need = target.length
     s.forEachIndexed { r, c ->
-        if (dept[c.code]++ < 0) need--
+        if (debt[c.code]++ < 0) need--
         if (need == 0) {
-            while (dept[s[l].code] > 0) dept[s[l++].code]--
+            while (debt[s[l].code] > 0) debt[s[l++].code]--
             if (r - l + 1 < len) {
                 start = l
                 len = r - l + 1
             }
         }
     }
-    return if (len == Int.MAX_VALUE) "" else s.substring(start, start + len)
+    return if (len == Int.MAX_VALUE)  "" else s.substring(start, start + len)
 }
 
 fun canCompleteCircuit(gas: IntArray, cost: IntArray): Int {
@@ -171,8 +171,10 @@ fun collect(arr: IntArray, k: Int): Int {
     var result = 0
     arr.forEachIndexed { r, v ->
         if (count[v]++ == 0) collected++
-        if (collected > k) while (--count[arr[l++]] == 0) collected--
-        result += r - l + 1
+        if (collected >= k) {
+            while (--count[arr[l++]] == 0) collected--
+            result += r - l + 1
+        }
     }
     return result
 }
